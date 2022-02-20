@@ -47,13 +47,12 @@ export default function process () {
                 mediaRecorder.ondataavailable = function(e) {
                     console.log(e.data.type);
                     var oReq = new XMLHttpRequest();
-                    oReq.open("POST", "https://147.182.202.123:80/query-example", true);
+                    oReq.open("POST", "https://localhost/query-example", true);
 
                     oReq.onload = function () {
                         if (oReq.readyState === oReq.DONE) {
                             if (oReq.status === 200) {
-                                console.log(oReq.response);
-                                console.log(oReq.responseText);
+                                document.body.style.backgroundImage = "url(" + oReq.responseText + ")";
                             }
                         }
                     };
