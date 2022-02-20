@@ -25,48 +25,48 @@ function toggleFunc() {
     }
 }
 
-export default function process () {
-    if (typeof window != 'undefined'){
-        setTimeout(repeat, 1000);
+function setup () {
+    setTimeout(repeat, 1000);
 
-        var elem = document.getElementById('toggle');
-        elem.addEventListener("click", toggleFunc);
+    var elem = document.getElementById('toggle');
+    elem.addEventListener("click", toggleFunc);
 
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-           console.log('getUserMedia supported.');
-           navigator.mediaDevices.getUserMedia (
-              {
-                 audio: true
-              })
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+       console.log('getUserMedia supported.');
+       navigator.mediaDevices.getUserMedia (
+          {
+             audio: true
+          })
 
-              // Success callback
-              .then(function(stream) {
-                mediaRecorder = new MediaRecorder(stream);
-                let chunks = [];
+          // Success callback
+          .then(function(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            let chunks = [];
 
-                mediaRecorder.ondataavailable = function(e) {
-                    console.log(e.data.type);
-                    var oReq = new XMLHttpRequest();
-                    oReq.open("POST", "https://localhost/query-example", true);
+            mediaRecorder.ondataavailable = function(e) {
+                console.log(e.data.type);
+                var oReq = new XMLHttpRequest();
+                oReq.open("POST", "https://localhost/query-example", true);
 
-                    oReq.onload = function () {
-                        if (oReq.readyState === oReq.DONE) {
-                            if (oReq.status === 200) {
-                                document.body.style.backgroundImage = "url(" + oReq.responseText + ")";
-                            }
+                oReq.onload = function () {
+                    if (oReq.readyState === oReq.DONE) {
+                        if (oReq.status === 200) {
+                            document.body.style.backgroundImage = "url(" + oReq.responseText + ")";
                         }
-                    };
-                    oReq.send(e.data);
-                }
-              })
+                    }
+                };
+                oReq.send(e.data);
+            }
+          })
 
-              // Error callback
-              .catch(function(err) {
-                 console.log('The following getUserMedia error occurred: ' + err);
-              }
-           );
-        } else {
-           console.log('getUserMedia not supported on your browser!');
-        }
+          // Error callback
+          .catch(function(err) {
+             console.log('The following getUserMedia error occurred: ' + err);
+          }
+       );
+    } else {
+       console.log('getUserMedia not supported on your browser!');
     }
 }
+
+setup()
