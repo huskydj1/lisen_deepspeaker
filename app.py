@@ -1,4 +1,4 @@
-import os 
+import os, subprocess
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 # Load Flask-Related Libraries
@@ -22,6 +22,7 @@ from conv_models import DeepSpeakerModel
 from test import batch_cosine_similarity
 
 def generateFace(a):
+
     colorBank = ['amber', 'blue', 'blueGrey', 'brown', 'cyan', 'deepOrange', 'deepPurple', 'green', 'grey', 'indigo', 'lightBlue', 'lightGreen', 'lime', 'orange', 'pink', 'purple', 'red', 'teal', 'yellow']
     colorLevelBank = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
 
@@ -41,20 +42,37 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+@app.route('/')
+def main_method():
+    return render_template('index.html')
+
 @app.route('/query-example')
 def query_example():
     return 'Query String Example'
 
+
+counter = 0
 @app.route("/result", methods = ["POST"])
 def result():
-    print(request.files)
-    data = request.files['audio_data'].read()
-    print(data)
+    global counter
+    counter+=1
+    print(counter)
+    request.files['audio_data'].save('static/{}.ogg'.format(counter))
 
-    mfcc_000 = sample_from_mfcc(read_mfcc('samples/1255-90413-0001.flac', SAMPLE_RATE), NUM_FRAMES)
+    a = int((counter - 1) // 12);
+    b = int((counter - 1) % 12) * 5;
+    #if b < 0:
+    #    b = 0
+    subprocess.run(["ffmpeg", '-y', "-i", 'static/{}.ogg'.format(counter), '-ss', str(a) + ':' + str(b), 'static/{}.wav'.format(counter)])
+
+    mfcc_000 = sample_from_mfcc(read_mfcc('static/{}.wav'.format(counter), SAMPLE_RATE), NUM_FRAMES)
+
     predict_000 = model.m.predict(np.expand_dims(mfcc_000, axis=0))
 
     return generateFace(predict_000.flatten())
+    
+
+    # return "https://avatars.dicebear.com/api/bottts/12314.svg?colors[]=brown&colors[]=red&colorful=true&topChance=99"
     
 if __name__ == '__main__':
 

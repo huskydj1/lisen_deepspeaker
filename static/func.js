@@ -1,6 +1,6 @@
 var recOn = false;
 var mediaRecorder;
-var interval = 1000;
+var interval = 5000;
 
 function repeat() {
     document.body.style.backgroundImage = "url(https://nationaltoday.com/wp-content/uploads/2020/07/Kitten-640x514.jpg)";
@@ -12,20 +12,21 @@ function repeat() {
 function toggleFunc() {
     var elem = document.getElementById('toggle');
     elem.srcset = "";
+    console.log("toggl!!!");
     if (!recOn) {
-        elem.src = 'mic.svg';
+        elem.src = '/static/mic.svg';
         recOn = true;
         mediaRecorder.start(interval);
         console.log(mediaRecorder.state);
         console.log("recorder started");
     } else  {
-        elem.src = 'mic-off.svg';
+        elem.src = '/static/mic-off.svg';
         recOn = false;
         mediaRecorder.stop();
     }
 }
 
-export default function process () {
+function process () {
     if (typeof window != 'undefined'){
         setTimeout(repeat, 1000);
 
@@ -47,7 +48,7 @@ export default function process () {
                 mediaRecorder.ondataavailable = function(e) {
                     console.log(e.data.type);
                     var oReq = new XMLHttpRequest();
-                    oReq.open("POST", "https://localhost/query-example", true);
+                    oReq.open("POST", "http://localhost/result", true);
 
                     oReq.onload = function () {
                         if (oReq.readyState === oReq.DONE) {
@@ -56,7 +57,12 @@ export default function process () {
                             }
                         }
                     };
-                    oReq.send(e.data);
+
+                    chunks.push(e.data);
+                    const blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus'});
+                    var formData = new FormData();
+                    formData.append("audio_data", blob);
+                    oReq.send(formData);
                 }
               })
 
@@ -70,3 +76,5 @@ export default function process () {
         }
     }
 }
+
+setTimeout(process, 2000)
